@@ -1,0 +1,63 @@
+From 62d7f858bec8151e4e9d2e7b54e6dddc149ff07d Mon Sep 17 00:00:00 2001
+From: Juan Pablo Ruiz <juanpablo.ruiz@tii.ae>
+Date: Wed, 21 Dec 2022 13:00:42 +0000
+Subject: [PATCH 1/1] Add support for Display VM
+
+U-boot passes the imx8qm-mek-kvm-host.dtb to the host Linux. This DTB
+has the GPU/HDMI disabled on host and reserved for the VMs.
+
+U-boot loads the SCU configuration before HDMI firmware loading,
+by modifying the CONFIG_BOOTCOMMAND
+
+Disable video on uboot by disabling CONFIG_DM_VIDEO. The U-boot uses
+the display to show boot information via the display controller 0 (DC0).
+Nevertheless, when we need to passthrough the DC0 to the guest Display VM,
+first we need to tell the SCU, that this resource is reserved for the VM. When
+we do this, by the host's device tree the U-boot crash on booting. To avoid
+this crash we need to build again the U-boot disabling the video support
+(CONFIG_DM_VIDEO unset).
+
+Signed-off-by: Juan Pablo Ruiz <juanpablo.ruiz@tii.ae>
+---
+ configs/imx8qm_mek_defconfig | 4 ++--
+ include/configs/imx8qm_mek.h | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/configs/imx8qm_mek_defconfig b/configs/imx8qm_mek_defconfig
+index 1ed6eeee57..f272023300 100644
+--- a/configs/imx8qm_mek_defconfig
++++ b/configs/imx8qm_mek_defconfig
+@@ -31,7 +31,7 @@ CONFIG_PANIC_HANG=y
+ CONFIG_OF_SYSTEM_SETUP=y
+ CONFIG_BOOTDELAY=3
+ CONFIG_USE_BOOTCOMMAND=y
+-CONFIG_BOOTCOMMAND="run loadhdp; hdp load ${hdp_addr}; run distro_bootcmd;"
++CONFIG_BOOTCOMMAND="run loadfdt; scu_rm dtb ${fdt_addr}; run loadhdp; hdp load ${hdp_addr}; run distro_bootcmd;"
+ CONFIG_LOG=y
+ CONFIG_BOARD_EARLY_INIT_F=y
+ CONFIG_SPL_BOARD_INIT=y
+@@ -185,7 +185,7 @@ CONFIG_VIDEO_IMX_HDP_LOAD=y
+ CONFIG_OF_LIBFDT_OVERLAY=y
+ 
+ CONFIG_VIDEO_IMXDPUV1=y
+-CONFIG_DM_VIDEO=y
++# CONFIG_DM_VIDEO is not set
+ CONFIG_BMP_16BPP=y
+ CONFIG_BMP_24BPP=y
+ CONFIG_BMP_32BPP=y
+diff --git a/include/configs/imx8qm_mek.h b/include/configs/imx8qm_mek.h
+index ab5b58ec32..bac39c4ae8 100644
+--- a/include/configs/imx8qm_mek.h
++++ b/include/configs/imx8qm_mek.h
+@@ -197,7 +197,7 @@
+ 	"cntr_addr=0x98000000\0"			\
+ 	"cntr_file=os_cntr_signed.bin\0" \
+ 	"boot_fdt=try\0" \
+-	"fdtfile=imx8qm-mek-hdmi.dtb\0" \
++	"fdtfile=imx8qm-mek-kvm-host.dtb\0" \
+ 	"mmcdev="__stringify(CONFIG_SYS_MMC_ENV_DEV)"\0" \
+ 	"mmcpart=1\0" \
+ 	"mmcroot=" CONFIG_MMCROOT " rootwait rw\0" \
+-- 
+2.34.1
+

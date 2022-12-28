@@ -1,7 +1,7 @@
 
 final: prev: {
   linux_imx8 = final.callPackage ./bsp/kernel/linux-imx8 { pkgs = final; };
-  inherit ( final.callPackage ./bsp/u-boot/imx8/imx-uboot.nix { pkgs = final; targetBoard = "imx8qm"; }) ubootImx8 imx-firmware;
+  inherit ( final.callPackage ./bsp/u-boot/imx8/imx-uboot.nix { pkgs = final; targetBoard = "imx8qxp"; }) ubootImx8 imx-firmware;
 
   linux_latest = final.linux_imx8;
 
@@ -43,8 +43,7 @@ final: prev: {
         .partitiontable |
         .sectorsize * (.partitions[] | select(.type == ESP_GUID) | .start)
       ')
-      mcopy -no -i $pname@@$ESP_OFFSET ${final.linux_imx8}/dtbs/freescale/imx8qm-mek-hdmi.dtb ::/
-      mcopy -no -i $pname@@$ESP_OFFSET ${final.imx-firmware}/hdmitxfw.bin ::/
+      mcopy -no -i $pname@@$ESP_OFFSET ${final.linux_imx8}/dtbs/freescale/imx8qxp-mek.dtb ::/
       mv $pname $out
       runHook postInstall
     '';

@@ -1,0 +1,8 @@
+#!/bin/execlineb -P
+# SPDX-License-Identifier: EUPL-1.2+
+# SPDX-FileCopyrightText: 2020-2021 Alyssa Ross <hi@alyssa.is>
+# SPDX-FileCopyrightText: 2022 TII
+
+foreground { sleep 5 }
+
+s6-rc -u change memshare

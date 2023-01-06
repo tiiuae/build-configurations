@@ -7,6 +7,7 @@ let
   appvm-zathura = pkgs.callPackage ../../vm/zathura { inherit config; };
   usbvm = pkgs.callPackage ../../vm/usb { inherit config; };
   usbappvm = pkgs.callPackage ../../vm/usbapp {inherit config; };
+  appvm-memshare = pkgs.callPackage ../../vm/memshare { inherit config; };
 
   myextpart = with pkgs; vmTools.runInLinuxVM (
     stdenv.mkDerivation {
@@ -24,6 +25,8 @@ let
         dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
         spaceInMiB=$(du -sB M ${usbappvm} | awk '{ print substr( $1, 1, length($1)-1 ) }')
         dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
+        spaceInMiB=$(du -sB M ${appvm-memshare} | awk '{ print substr( $1, 1, length($1)-1 ) }')
+        dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
         resize2fs -p user-ext.ext4
 
         tune2fs -O ^read-only user-ext.ext4
@@ -34,6 +37,7 @@ let
         mkdir mp/svc/data/appvm-zathura && tar -C ${appvm-zathura} -c . | tar -C mp/svc/data/appvm-zathura -x
         mkdir mp/svc/data/usbvm && tar -C ${usbvm} -c . | tar -C mp/svc/data/usbvm -x
         mkdir mp/svc/data/usbappvm && tar -C ${usbappvm} -c . | tar -C mp/svc/data/usbappvm -x
+        mkdir mp/svc/data/appvm-memshare && tar -C ${appvm-memshare} -c . | tar -C mp/svc/data/appvm-memshare -x
         umount mp
         tune2fs -O read-only user-ext.ext4
         cp user-ext.ext4 $out

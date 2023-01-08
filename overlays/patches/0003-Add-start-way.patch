@@ -1,0 +1,28 @@
+diff --git a/Makefile b/Makefile
+index 4588033..1c53c60 100644
+--- a/Makefile
++++ b/Makefile
+@@ -43,6 +43,7 @@ FILES = \
+ 	usr/bin/lsvm \
+ 	usr/bin/vm-console \
+ 	usr/bin/vm-start \
++	usr/bin/vm-start-way \
+ 	usr/bin/vm-stop
+ DIRS = dev etc/s6-linux-init/env ext run proc sys
+ 
+diff --git a/host/rootfs/usr/bin/vm-start-way b/host/rootfs/usr/bin/vm-start-way
+new file mode 100755
+index 0000000..bda9934
+--- /dev/null
++++ b/host/rootfs/usr/bin/vm-start-way
+@@ -0,0 +1,10 @@
++#!/bin/sh 
++# SPDX-License-Identifier: EUPL-1.2+
++
++s6-rc -bu change ext-rc
++s6-rc -l /run/s6-rc.ext -u change $1 
++ch-remote --api-socket /run/service/ext-${1}/env/cloud-hypervisor.sock add-vsock cid=4,socket=/run/u.${1}.socket
++cd /run
++nohup waypipe --socket /run/waypipe.sock client &
++nohup socat unix-listen:/run/u.${1}.socket_5000,reuseaddr,fork unix-connect:/run/waypipe.sock &
++

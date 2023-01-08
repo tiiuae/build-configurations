@@ -4,7 +4,9 @@ final: prev: {
         # TODO move this feature to the future "development" release.
         # This patch allows to use serial console through USB interface of NUC
         # device.
-        patches = [ ./patches/0001-Open-USB-serial-terminal-at-boot.patch ];
+        patches = [ ./patches/0001-Open-USB-serial-terminal-at-boot.patch 
+                    ./patches/0003-Add-start-way.patch
+                ];
     });
     spectrum-live = prev.spectrum-live.overrideAttrs (old: {
         ROOT_FS = final.spectrum-rootfs;

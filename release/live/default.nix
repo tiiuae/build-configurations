@@ -7,6 +7,7 @@ let
   appvm-zathura = pkgs.callPackage ../../vm/zathura { inherit config; };
   usbvm = pkgs.callPackage ../../vm/usb { inherit config; };
   usbappvm = pkgs.callPackage ../../vm/usbapp {inherit config; };
+  appvm-firefox = pkgs.callPackage ../../vm/firefox {inherit config; };
 
   myextpart = with pkgs; vmTools.runInLinuxVM (
     stdenv.mkDerivation {
@@ -20,6 +21,8 @@ let
         install -m 0644 ${spectrum-live.EXT_FS} user-ext.ext4
         spaceInMiB=$(du -sB M ${appvm-zathura} | awk '{ print substr( $1, 1, length($1)-1 ) }')
         dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
+        spaceInMiB=$(du -sB M ${appvm-firefox} | awk '{ print substr( $1, 1, length($1)-1 ) }')
+        dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
         spaceInMiB=$(du -sB M ${usbvm} | awk '{ print substr( $1, 1, length($1)-1 ) }')
         dd if=/dev/zero bs=1M count=$(expr $spaceInMiB + 50) >> user-ext.ext4
         spaceInMiB=$(du -sB M ${usbappvm} | awk '{ print substr( $1, 1, length($1)-1 ) }')
@@ -32,6 +35,7 @@ let
         chmod +w mp/svc/data
         # A lot of room for improvements
         mkdir mp/svc/data/appvm-zathura && tar -C ${appvm-zathura} -c . | tar -C mp/svc/data/appvm-zathura -x
+        mkdir mp/svc/data/appvm-firefox && tar -C ${appvm-firefox} -c . | tar -C mp/svc/data/appvm-firefox -x
         mkdir mp/svc/data/usbvm && tar -C ${usbvm} -c . | tar -C mp/svc/data/usbvm -x
         mkdir mp/svc/data/usbappvm && tar -C ${usbappvm} -c . | tar -C mp/svc/data/usbappvm -x
         umount mp
